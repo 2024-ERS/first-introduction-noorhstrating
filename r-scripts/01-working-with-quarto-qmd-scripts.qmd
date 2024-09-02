@@ -82,8 +82,9 @@ starting with #\| and then the script itself. This code chunk can be run
 as a block of code by using the small green arrow at the top right.
 
 Make a simple code block
+
 ```{r}
-# define a variable A and assing the vlaue 5 to it
+# define a variable A and assign the value 5 to it
 A <- 5
 # same for a variable B
 B <- 10
@@ -91,8 +92,14 @@ B <- 10
 C <- A + B
 #print the result
 print(C)
+
+my_numbers <- c(1, 3, 7, 12, 36)
+base::mean(my_numbers)
 ```
 
+The sum of 10 and 5 is 15
+
+Then make a plot
 
 ```{r, message = FALSE, warning = FALSE}
 #| label: fig-histogram
@@ -103,8 +110,10 @@ library(tidyverse)
 set.seed(123)
 # generate 100 random values form a normal distribution with mean=0 and standard deviation 1
 randomvalue <- rnorm(n = 100, mean = 0, sd = 1)
+mean(randomvalue)
 # convert to a dataframe
 data1<-data.frame(randomvalue)
+print(data1)
 # plot as a histogram
 ggplot2::ggplot(data=data1, 
                 mapping=aes(x=randomvalue)) +
@@ -160,7 +169,7 @@ set if you want different aspects as the code itself, the output from
 that code, warnings, etc in the output document.
 
 | Execute option: | Descript                                                                                                                                                                                    |
-|------------------|------------------------------------------------------|
+|----------------------|-------------------------------------------------|
 | eval            | Evaluate the code chunk (if false, just echos the code into the output). echo Include the source code in output                                                                             |
 | output          | Include the results of executing the code in the output (true, false, or asis to indicate that the output is raw markdown and should not have any of Quarto’s standard enclosing markdown). |
 | warning         | Include warnings in the output.                                                                                                                                                             |
