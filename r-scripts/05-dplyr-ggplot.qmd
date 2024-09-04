@@ -6,6 +6,8 @@ format: html
 editor: 
   markdown: 
     wrap: 72
+editor_options:
+  chunk_output_type: console
 ---
 
 # Working with the dplyr and ggplot2 packages
