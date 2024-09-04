@@ -15,6 +15,9 @@ editor_options:
 Load the required libraries :
 
 ```{r message = FALSE, warning = FALSE}
+# restore your librar; keep at the start of every script to make sure the library version is uptodate
+renv::restore()
+
 # clear the R environment
 rm(list = ls())
 
@@ -43,7 +46,11 @@ Read the FactCockleSize table with read_csv, which reads it as tibble
 (formatted dataframe)
 
 ```{r}
-FactCockleSize <- readr::read_csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vSpormjGiM4uWMTIZYm9Upt5j1Ige_Wu9CrhGGdvjXwxmHP2R6S7JDyEmiGTn3fXihl5s5yBn_sdo8h/pub?gid=1538766002&single=true&output=csv")
+FactCockleSize <- readr::read_csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vSpormjGiM4uWMTIZYm9Upt5j1Ige_Wu9CrhGGdvjXwxmHP2R6S7JDyEmiGTn3fXihl5s5yBn_sdo8h/pub?gid=1538766002&single=true&output=csv") #instead of read.csv, read_csv makes a special dataframe (a tibble)
+print(FactCockleSize)
+names(FactCockleSize)
+nrow(FactCockleSize)
+
 ```
 
 Plot with ggplot the relation between cockle thickness (thickness_mm, as
@@ -54,9 +61,33 @@ add a regression line through all the years
 ggplot(data=FactCockleSize |> dplyr::filter(thickness_mm <300), #filter for outliers
        mapping = aes(x=thickness_mm, 
                      y=length_mm, 
-                     col = year)) +
+                     col = as.factor(year))) +
   geom_point() +
   geom_smooth(method = 'lm', col = 'orange') # adds a regressionline in the plot
+
+#in klas
+ggplot2::ggplot(data=FactCockleSize , # what dataset
+                mapping=aes(x=length_mm, y=thickness_mm)) + # what is on the axes
+  geom_point() 
+
+#there is a big outlier, likely a data entry mistake, remove it
+FactCockleSize |> dplyr::filter(thickness_mm>500) #first show which datapoint is the outlier
+
+FactCockleSize <- readr::read_csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vSpormjGiM4uWMTIZYm9Upt5j1Ige_Wu9CrhGGdvjXwxmHP2R6S7JDyEmiGTn3fXihl5s5yBn_sdo8h/pub?gid=1538766002&single=true&output=csv") |> dplyr::filter(thickness_mm<500) #filter the original dataset for the outlier, already when initially uploading the datset OR
+
+#filter for this specific observation, this is better 
+FactCockleSize <- readr::read_csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vSpormjGiM4uWMTIZYm9Upt5j1Ige_Wu9CrhGGdvjXwxmHP2R6S7JDyEmiGTn3fXihl5s5yBn_sdo8h/pub?gid=1538766002&single=true&output=csv") |> dplyr::filter(CockleObs_ID!=1531, CockleObs_ID!=469)
+
+
+#again make the plot
+ggplot2::ggplot(data=FactCockleSize , # what dataset
+                mapping=aes(x=length_mm, y=thickness_mm)) + # what is on the axes
+  geom_point() 
+
+#find that other outlier
+FactCockleSize |> dplyr::filter(thickness_mm>10 & length_mm<5)
+#also remove observation 469 above
+
 ```
 
 Further explore the plot with a regression line through all the data
