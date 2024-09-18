@@ -1,0 +1,21 @@
+# Running a python code
+
+```{python}
+# Import the matplotlib library
+import matplotlib.pyplot as plt
+
+# Create data
+x = [1, 2, 3, 4, 5]
+y = [10, 15, 7, 20, 10]
+
+# Create a simple line plot
+plt.plot(x, y)
+plt.xlabel('X-axis')
+plt.ylabel('Y-axis')
+plt.title('Simple Line Plot')
+
+# Display the plot
+plt.show()
+```
+
+Use 'exit' to exit the python console, and return to the R console

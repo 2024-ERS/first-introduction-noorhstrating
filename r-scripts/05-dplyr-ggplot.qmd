@@ -1,0 +1,178 @@
+---
+title: "Starting with with the dplyr, ggplot2 packages, and the pipe operator |>"
+author: "Han Olff"
+date: "2024-08-29"
+format: html
+editor: 
+  markdown: 
+    wrap: 72
+editor_options:
+  chunk_output_type: console
+---
+
+# Working with the dplyr and ggplot2 packages
+
+Load the required libraries :
+
+```{r message = FALSE, warning = FALSE}
+# restore your librar; keep at the start of every script to make sure the library version is uptodate
+renv::restore()
+
+# clear the R environment
+rm(list = ls())
+
+# load the required packages
+library(tidyverse)  # this loads a group of related packages, including readr, dplyr and ggplot2
+```
+
+We will work with an online database of the Schiermonnikoog transect
+study, that you will collect additional data for next week in the field.
+In this example, we work with measurements of cockles (a bivalve
+mollusc) on their width and length. From the database Epibenthos, we
+will work with the table
+[FactCockles](https://docs.google.com/spreadsheets/d/1E1vUWAHhse7fhjBf94Kiog3Rsj7IkMuFtP-BTQX2oI8/edit?gid=1538766002#gid=1538766002).
+See the documentation of the different variables in the table
+[MetVariables](https://docs.google.com/spreadsheets/d/1E1vUWAHhse7fhjBf94Kiog3Rsj7IkMuFtP-BTQX2oI8/edit?gid=1290622213#gid=1290622213)
+
+### Read the datafile from the Google sheets database
+
+To read the data in R, you first need to know the published csv link of
+the FactCockles table. In the database, you can find this link in the
+table MetTables. It is produced in Google Sheets throught the menu
+File/Share/Publish to web and then selecting the table and output as
+csv.
+
+Read the FactCockleSize table with read_csv, which reads it as tibble
+(formatted dataframe)
+
+```{r}
+FactCockleSize <- readr::read_csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vSpormjGiM4uWMTIZYm9Upt5j1Ige_Wu9CrhGGdvjXwxmHP2R6S7JDyEmiGTn3fXihl5s5yBn_sdo8h/pub?gid=1538766002&single=true&output=csv") #instead of read.csv, read_csv makes a special dataframe (a tibble)
+print(FactCockleSize)
+names(FactCockleSize)
+nrow(FactCockleSize)
+
+```
+
+Plot with ggplot the relation between cockle thickness (thickness_mm, as
+x) and length (length_mm), showing each year with a different color, and
+add a regression line through all the years
+
+```{r}
+ggplot(data=FactCockleSize |> dplyr::filter(thickness_mm <300), #filter for outliers
+       mapping = aes(x=thickness_mm, 
+                     y=length_mm, 
+                     col = as.factor(year))) +
+  geom_point() +
+  geom_smooth(method = 'lm', col = 'orange') # adds a regressionline in the plot
+
+#in klas
+ggplot2::ggplot(data=FactCockleSize , # what dataset
+                mapping=aes(x=length_mm, y=thickness_mm)) + # what is on the axes
+  geom_point() 
+
+#there is a big outlier, likely a data entry mistake, remove it
+FactCockleSize |> dplyr::filter(thickness_mm>500) #first show which datapoint is the outlier
+
+FactCockleSize <- readr::read_csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vSpormjGiM4uWMTIZYm9Upt5j1Ige_Wu9CrhGGdvjXwxmHP2R6S7JDyEmiGTn3fXihl5s5yBn_sdo8h/pub?gid=1538766002&single=true&output=csv") |> dplyr::filter(thickness_mm<500) #filter the original dataset for the outlier, already when initially uploading the datset OR
+
+#filter for this specific observation, this is better 
+FactCockleSize <- readr::read_csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vSpormjGiM4uWMTIZYm9Upt5j1Ige_Wu9CrhGGdvjXwxmHP2R6S7JDyEmiGTn3fXihl5s5yBn_sdo8h/pub?gid=1538766002&single=true&output=csv") |> dplyr::filter(CockleObs_ID!=1531, CockleObs_ID!=469) |>
+  dplyr::mutate(year=factor(year)) #make year a factor, because it is written down numerically while being a factor
+
+print(FactCockleSize)
+
+#again make the plot
+ggplot2::ggplot(data=FactCockleSize , # what dataset
+                mapping=aes(x=length_mm, y=thickness_mm)) + # what is on the axes
+  geom_point() 
+
+#find that other outlier
+FactCockleSize |> dplyr::filter(thickness_mm>10 & length_mm<5)
+#also remove observation 469 above
+```
+
+Further explore the plot with a regression line through all the data
+
+```{r}
+#plot with thickness_mm per year
+ggplot(data=FactCockleSize |> dplyr::filter(thickness_mm <300), #filter for outliers
+       mapping = aes(x=year, 
+                     y=thickness_mm)) +
+  geom_point() +
+  geom_smooth(method = 'lm', col = 'orange') # adds a regressionline in the plot
+
+#plot with length_mm per year
+ggplot(data=FactCockleSize, #filter for outliers
+       mapping = aes(x=year, 
+                     y=length_mm, 
+                     col = year)) +
+  geom_point() +
+  geom_smooth(method = 'lm', col = 'orange') # adds a regressionline in the plot
+
+
+#in klas
+#plot the data with a regression line
+ggplot2::ggplot(data=FactCockleSize , # what dataset
+                mapping=aes(x=length_mm, y=thickness_mm)) + # what is on the axes
+  geom_point() +
+  geom_smooth(method = 'lm')
+
+#calculate a linear regression
+model_lm<-lm(thickness_mm~length_mm, data=FactCockleSize)
+summary(model_lm)
+
+#equation: thickness_mm = -0.353442 + 0.699362 * length_mm
+#a cockle of length 20 mm has an predicted width of:
+-0.353442 + 0.699362 * 20
+# this regression is significant, R2=0.90, P<0.001 (***)
+```
+
+Make same plot but showing a separate regression line per year
+
+```{r}
+# color the points by year, but plot one regression line
+ggplot(data=FactCockleSize |> 
+        dplyr::filter(thickness_mm <300), #filter for outliers
+       mapping = aes(x=thickness_mm, 
+                     y=length_mm,
+                     col = as.factor(year))) +
+  geom_point() +
+  geom_smooth(method = 'lm') # adds a regressionline in the plot
+
+
+#in klas
+ggplot2::ggplot(data=FactCockleSize , # what dataset
+                mapping=aes(x=length_mm, y=thickness_mm)) + # what is on the axes
+  geom_point(mapping=aes(col = year)) +
+  geom_smooth(method = "lm", col = 'black')
+```
+
+Make a panel plot where with each year is shown as a separate graph
+
+```{r}
+ggplot(data=FactCockleSize |> 
+        dplyr::filter(thickness_mm <300), #filter for outliers
+       mapping = aes(x=thickness_mm, 
+                     y=length_mm,
+                     col = as.factor(year))) +
+  geom_point() +
+  facet_wrap(~ year) +
+  geom_smooth(method = 'lm', col = 'black')
+
+
+#in klas
+drop_na(FactCockleSize) |>   # drops any rows that are missing values
+ # dplyr::filter(year %in% c(2014,2015,2017,2018,2020,2021)) |>  #filter for particular years
+ # dplyr::mutate(year=factor(year))  |>
+    ggplot2::ggplot(mapping=aes(x=length_mm, y=thickness_mm)) + # what is on the axes
+      geom_point(mapping=aes(col = year)) +
+      xlab("cockle length (mm)") +
+      ylab("cockle width (mm)") +
+      geom_smooth(method = "lm", col = 'black') +
+      facet_wrap(~year) #adds a panel plot per year
+```
+
+We conclude from this that: \* there were two important outliers in the
+dataset that were removed after visual inspection \* the regression
+between length and width is abou the same for every year, we safely can
+use only length as a proxy for the biomass of an individual cockle

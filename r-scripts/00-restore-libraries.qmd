@@ -1,0 +1,29 @@
+---
+title: "Using the renv library for making R predictable"
+author: "Han Olff - changed by Noor Hoogerduijn Strating"
+format: html
+date: "2024-09-02"
+---
+
+# Using renv for making R predictable
+
+A major strength, but also potential challenge of R is that the software changes all the time. All functionality of R comes from packages, and these are improved, expanded, updated all the time. Say that you develop a set of scripts in R now, for example to analyse the data in your master project., and you develop a publication from the results. But you get several revisions, and finally complete the paper two years later. By that time, you will have updated your versions of R and your packages several times.This may change the functionality of your scripts, they may not work anymore. And when you publish the paper and deposit the data and scripts in a repository, even 10 years from now you want to be able to replicate your analyses, with the "old" versions of the packages that you used at the time when you did the analysis for the paper.
+
+A similar problem works when working on scripts and data in a collaborative project with multiple people. Then typically, not every every collaborator will have exactly the same packages and samve versions of the same package installed in their R library. This means only one person can improve the scripts and run them, instead of everyone contributing.
+
+The renv package solves this in combination with using an R Studio project and Git/Github. You use it to create an renv.lock file with renv::init(). You typically only do this once. This initialization of your project serves two goals:\
+\* new packages are installed from then on in a library in the local folder of your project, not anymore in your general R installation. So the packages "belong" to the project\
+\* you, or your collaborators, can use renv::restore() to create now or later exactly the same R library (same versions of the packages) as you are using to develop the scripts, where these version numbers are read from the renv.lock file. If certain packages are not installed yet on that specific computer, they will be installed.
+
+This ensures that your project uses the exact same package versions and dependencies that were initially recorded, making it easier to reproduce analyses and maintain consistency across different environments or collaborators. The version of packages in the library can be update by yourself or your collaborator, but then then renv::restore() causes all to use the same versions of all libraries. Be carefull with this, only update your library when really nescessary (eg a package contains an error or missing functionality). Otherwise just stick to the version that you used when you started the project.
+
+Make sure that before you use renv::restore(), you have rtools installed. This is a set of tools that are needed to compile some packages from source. Install the RTools version that matches your R version. So if you have R version 4.4 you need RTools 44. You can download rtools from the [CRAN website at this link](https://cran.r-project.org/bin/windows/Rtools/), and choose the Rtools installer, using default installation settings.
+
+Here is how to use restore:
+
+```{r}
+#| label: restore-all-package-versions
+renv::restore() # restore your libraries from the lock file
+```
+
+Run this code to restore your local library to the same packages and same versions of these that I used when I made this R project.
